@@ -7,7 +7,7 @@
 </head>
 <body>
     <p>Top of canvas</p>
-    <canvas id="c" width="960" height="490">
+    <canvas id="c" width="960" height="480">
         <script  type="importmap">{
             "imports": {
                 "three": "https://threejs.org/build/three.module.js"
@@ -44,7 +44,18 @@
           scene.add(light);
 
           function makeInstance(geometry, color, x) {
-                const material = new THREE.MeshPhongMaterial({color});
+
+
+
+                const loader = new THREE.TextureLoader();
+                const texture = loader.load( 'resources/images/wall.jpg' );
+                texture.colorSpace = THREE.SRGBColorSpace;
+                
+                const material = new THREE.MeshBasicMaterial({
+                color: 0xFF8844,
+                map: texture,
+                });
+        
                 const cube = new THREE.Mesh(geometry, material);
                 scene.add(cube);
                 cube.position.x = x;
