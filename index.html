@@ -44,7 +44,7 @@
                 const planeSize = 1200;
 
                 const loader = new THREE.TextureLoader();
-                const texture = loader.load('https://threejs.org/manual/examples/resources/images/checker.png');
+                const texture = loader.load('resources/images/grass.jpg');
                 texture.colorSpace = THREE.SRGBColorSpace;
                 texture.wrapS = THREE.RepeatWrapping;
                 texture.wrapT = THREE.RepeatWrapping;
@@ -114,7 +114,7 @@
             const boxDepth = 1;
             const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 
-            function makeInstance(geometry, color, x, y) {
+            function makeInstance(geometry, color, x=0, y=0, z=10) {
               const loader = new THREE.TextureLoader();
               const texture = loader.load( 'resources/images/wall.jpg' );
               texture.colorSpace = THREE.SRGBColorSpace;
@@ -126,16 +126,35 @@
               scene.add(cube);
               cube.position.x = x;
               cube.position.y = y;
-              cube.scale.set(2, 2, 2);
+              cube.position.z = z;
+              cube.scale.set(3, 3, 3);
 
               return cube;
             }
 
+            // 20 cubes that are individually placed and rendered. They will all be rotating when rendered
             const cubes = [
-                makeInstance(geometry, 0x44aa88, 10, 5),
-                makeInstance(geometry, 0x8844aa, -12, 5),
-                makeInstance(geometry, 0xaa8844, 6, 5),
-            ];
+              makeInstance(geometry, 0x44aa88, 10, 3, -5),
+              makeInstance(geometry, 0x8844aa, -12, 3, 10),
+              makeInstance(geometry, 0xaa8844, 6, 3, -5),
+              makeInstance(geometry, 0xff0000, -8, 3, 5),
+              makeInstance(geometry, 0x00ff00, 12, 3, 12),
+              makeInstance(geometry, 0x0000ff, -16, 3, -12),
+              makeInstance(geometry, 0xffff00, 8, 3, 24),
+              makeInstance(geometry, 0xff00ff, -4, 3, -24),
+              makeInstance(geometry, 0x00ffff, 4, 3, 20),
+              makeInstance(geometry, 0xffffff, -20, 3, 36),
+              makeInstance(geometry, 0x000000, 20, 3, -10),
+              makeInstance(geometry, 0x123456, -24, 3, 17),
+              makeInstance(geometry, 0x654321, 24, 3),
+              makeInstance(geometry, 0xabcdef, -28, 3),
+              makeInstance(geometry, 0xfedcba, 28, 3),
+              makeInstance(geometry, 0x112233, -32, 3),
+              makeInstance(geometry, 0x334455, 32, 3),
+              makeInstance(geometry, 0x556677, -36, 3),
+              makeInstance(geometry, 0x778899, 36, 3),
+              makeInstance(geometry, 0x99aabb, -40, 3),
+          ];
 
             function resizeRendererToDisplaySize(renderer) {
                 const canvas = renderer.domElement;
