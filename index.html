@@ -92,6 +92,8 @@
                 scene.add(light.target);
             }
 
+            let dogModel; // Variable to store the dog model
+
             {
                 const objLoader = new OBJLoader();
                 const mtlLoader = new MTLLoader();
@@ -102,6 +104,7 @@
                         root.rotation.x = -190;
                         root.scale.set(0.2, 0.2, 0.2);
                         scene.add(root);
+                        dogModel = root; // Store the dog model
                     });
                 });
             }
@@ -130,9 +133,9 @@
             const torusGeometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
             
 
-            function makeInstance(geometry, color, x=0, y=0, z=10) {
+            function makeInstance(geometry, color, x=0, y=0, z=10, url='resources/images/wall.jpg') {
               const loader = new THREE.TextureLoader();
-              const texture = loader.load( 'resources/images/wall.jpg' );
+              const texture = loader.load( url );
               texture.colorSpace = THREE.SRGBColorSpace;
               const material = new THREE.MeshBasicMaterial({
               color: 0xFF8844,
@@ -150,7 +153,7 @@
 
             // 20 cubes that are individually placed and rendered. They will all be rotating when rendered
             const cubes = [
-              makeInstance(cylinderGeometry, 0x44aa88, 50, 1, -5),
+              makeInstance(cylinderGeometry, 0x44aa88, 50, 1, -5, 'resources/images/grass.jpg'),
               makeInstance(sphereGeometry, 0x8844aa, 125, 1, 10),
               makeInstance(sphereGeometry, 0xaa8844, 146, 1),
               makeInstance(sphereGeometry, 0xff0000, 58, 7, -50),
@@ -200,9 +203,14 @@
                 // });
 
                 // Only the first cube is being rotated
-                cubes[0].rotation.x = time * 50;
+                cubes[0].rotation.x = time * 15;
                 cubes[2].rotation.y = time * 5;
                 cubes[1].rotation.x = time * 5;
+
+                // Rotate the dog model if it is loaded
+                if (dogModel) {
+                    dogModel.rotation.z = time * 0.5;
+                }
 
                 renderer.render(scene, camera);
                 requestAnimationFrame(render);
