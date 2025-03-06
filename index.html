@@ -29,7 +29,7 @@
             const fov = 45;
             const aspect = 2; // the canvas default
             const near = 0.1;
-            const far = 100;
+            const far = 2000;
             const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
             camera.position.set(0, 10, 20);
 
@@ -38,7 +38,19 @@
             controls.update();
 
             const scene = new THREE.Scene();
-            scene.background = new THREE.Color('black');
+            // scene.background = new THREE.Color('black');
+
+            // Load the skybox texture
+            const loader = new THREE.TextureLoader();
+            const texture = loader.load(
+			'resources/images/sky_ocean.jpg',
+			() => {
+
+				texture.mapping = THREE.EquirectangularReflectionMapping;
+				texture.colorSpace = THREE.SRGBColorSpace;
+				scene.background = texture;
+
+			} );
 
             {
                 const planeSize = 1200;
@@ -113,6 +125,10 @@
             const boxHeight = 1;
             const boxDepth = 1;
             const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+            const sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+            const cylinderGeometry = new THREE.CylinderGeometry(1, 1, 1, 32);
+            const torusGeometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
+            
 
             function makeInstance(geometry, color, x=0, y=0, z=10) {
               const loader = new THREE.TextureLoader();
@@ -127,33 +143,33 @@
               cube.position.x = x;
               cube.position.y = y;
               cube.position.z = z;
-              cube.scale.set(3, 3, 3);
+              cube.scale.set(10, 10, 10);
 
               return cube;
             }
 
             // 20 cubes that are individually placed and rendered. They will all be rotating when rendered
             const cubes = [
-              makeInstance(geometry, 0x44aa88, 10, 3, -5),
-              makeInstance(geometry, 0x8844aa, -12, 3, 10),
-              makeInstance(geometry, 0xaa8844, 6, 3, -5),
-              makeInstance(geometry, 0xff0000, -8, 3, 5),
-              makeInstance(geometry, 0x00ff00, 12, 3, 12),
-              makeInstance(geometry, 0x0000ff, -16, 3, -12),
-              makeInstance(geometry, 0xffff00, 8, 3, 24),
-              makeInstance(geometry, 0xff00ff, -4, 3, -24),
-              makeInstance(geometry, 0x00ffff, 4, 3, 20),
-              makeInstance(geometry, 0xffffff, -20, 3, 36),
-              makeInstance(geometry, 0x000000, 20, 3, -10),
-              makeInstance(geometry, 0x123456, -24, 3, 17),
-              makeInstance(geometry, 0x654321, 24, 3),
-              makeInstance(geometry, 0xabcdef, -28, 3),
-              makeInstance(geometry, 0xfedcba, 28, 3),
-              makeInstance(geometry, 0x112233, -32, 3),
-              makeInstance(geometry, 0x334455, 32, 3),
-              makeInstance(geometry, 0x556677, -36, 3),
-              makeInstance(geometry, 0x778899, 36, 3),
-              makeInstance(geometry, 0x99aabb, -40, 3),
+              makeInstance(cylinderGeometry, 0x44aa88, 50, 1, -5),
+              makeInstance(sphereGeometry, 0x8844aa, 125, 1, 10),
+              makeInstance(sphereGeometry, 0xaa8844, 146, 1),
+              makeInstance(sphereGeometry, 0xff0000, 58, 7, -50),
+              makeInstance(cylinderGeometry, 0x00ff00, 12, 1, 32),
+              makeInstance(geometry, 0x0000ff, -16, 1, -12),
+              makeInstance(torusGeometry, 0xffff00, 8, 1, 24),
+              makeInstance(geometry, 0xff00ff, -4, 1, -24),
+              makeInstance(sphereGeometry, 0x00ffff, 4, 1, 150),
+              makeInstance(geometry, 0xffffff, -20, 1, 36),
+              makeInstance(torusGeometry, 0x000000, 20, 1, -120),
+              makeInstance(geometry, 0x123456, -24, 1, 17),
+              makeInstance(sphereGeometry, 0x654321, 24, 100),
+              makeInstance(geometry, 0xabcdef, -28, 1, -50),
+              makeInstance(geometry, 0xfedcba, 28, 1),
+              makeInstance(torusGeometry, 0x112233, -32, 1),
+              makeInstance(cylinderGeometry, 0x334455, 32, 1),
+              makeInstance(geometry, 0x556677, -36, 1),
+              makeInstance(cylinderGeometry, 0x778899, 36, 1),
+              makeInstance(sphereGeometry, 0x99aabb, -40, 1),
           ];
 
             function resizeRendererToDisplaySize(renderer) {
@@ -176,12 +192,17 @@
                     camera.updateProjectionMatrix();
                 }
 
-                cubes.forEach((cube, ndx) => {
-                    const speed = 1 + ndx * .1;
-                    const rot = time * 10 * speed;
-                    cube.rotation.x = rot;
-                    cube.rotation.y = rot;
-                });
+                // cubes.forEach((cube, ndx) => {
+                //     const speed = 1 + ndx * .1;
+                //     const rot = time * 10 * speed;
+                //     cube.rotation.x = rot;
+                //     cube.rotation.y = rot;
+                // });
+
+                // Only the first cube is being rotated
+                cubes[0].rotation.x = time * 50;
+                cubes[2].rotation.y = time * 5;
+                cubes[1].rotation.x = time * 5;
 
                 renderer.render(scene, camera);
                 requestAnimationFrame(render);
