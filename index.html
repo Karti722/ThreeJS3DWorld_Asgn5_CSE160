@@ -38,31 +38,27 @@
             controls.update();
 
             const scene = new THREE.Scene();
-            // scene.background = new THREE.Color('black');
 
             // Load the skybox texture
             const loader = new THREE.TextureLoader();
             const texture = loader.load(
-			'resources/images/sky_ocean.jpg',
+			'resources/images/nebula.jpg',
 			() => {
-
 				texture.mapping = THREE.EquirectangularReflectionMapping;
 				texture.colorSpace = THREE.SRGBColorSpace;
 				scene.background = texture;
-
 			} );
 
             {
-                const planeSize = 1200;
+                const planeSize = 2000;
 
                 const loader = new THREE.TextureLoader();
-                const texture = loader.load('resources/images/grass.jpg');
+                const texture = loader.load('resources/images/water.jpg');
                 texture.colorSpace = THREE.SRGBColorSpace;
-                texture.wrapS = THREE.RepeatWrapping;
-                texture.wrapT = THREE.RepeatWrapping;
+                texture.wrapS = THREE.ClampToEdgeWrapping;
+                texture.wrapT = THREE.ClampToEdgeWrapping;
                 texture.magFilter = THREE.NearestFilter;
-                const repeats = planeSize / 2;
-                texture.repeat.set(repeats, repeats);
+                texture.repeat.set(1, 1);
 
                 const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
                 const planeMat = new THREE.MeshPhongMaterial({
@@ -71,6 +67,7 @@
                 });
                 const mesh = new THREE.Mesh(planeGeo, planeMat);
                 mesh.rotation.x = Math.PI * -.5;
+                mesh.position.y = -12.5;
                 scene.add(mesh);
             }
 
@@ -84,12 +81,108 @@
 
             {
                 const color = 0xFFFFFF;
-                const intensity = 2.5;
+                const intensity = 5; // Increased intensity
                 const light = new THREE.DirectionalLight(color, intensity);
                 light.position.set(0, 10, 0);
                 light.target.position.set(-5, 0, 0);
                 scene.add(light);
                 scene.add(light.target);
+            }
+
+            // Three light sources here
+                // Add ambient light source
+            {
+                const color = 0xFFFFFF;
+                const intensity = 5; // Increased intensity
+                const ambientLight = new THREE.AmbientLight(color, intensity);
+                scene.add(ambientLight);
+            }
+
+            // Add point light source
+            {
+                const color = 0xFFFFFF;
+                const intensity = 100; // Increased intensity
+                const pointLight = new THREE.PointLight(color, intensity);
+                pointLight.position.set(10, 10, 10);
+                scene.add(pointLight);
+
+                // Add visual indicator for point light
+                const sphereSize = 1;
+                const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
+                scene.add(pointLightHelper);
+            }
+
+            // Add spot light source
+            {
+                const color = 0xFFFFFF;
+                const intensity = 100; // Increased intensity
+                const spotLight = new THREE.SpotLight(color, intensity);
+                spotLight.position.set(0, 20, 0);
+                spotLight.target.position.set(0,0,20);
+                spotLight.angle = 30;
+                scene.add(spotLight);
+                scene.add(spotLight.target);
+
+                // Add visual indicator for spot light
+                const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+                scene.add(spotLightHelper);
+            }
+
+            // Add spot light source
+            {
+                const color = 0xFFFFFF;
+                const intensity = 100; // Increased intensity
+                const spotLight = new THREE.SpotLight(color, intensity);
+                spotLight.position.set(0, 50, 0); // Adjust position as needed
+                spotLight.target.position.set(0, 0, 0); // Point to the center of the scene
+                spotLight.angle = Math.PI / 4; // Increase angle to cover more area
+                spotLight.distance = 200; // Increase distance to cover the entire scene
+                spotLight.penumbra = 0.5; // Add some softness to the edges
+                scene.add(spotLight);
+                scene.add(spotLight.target);
+
+                // Add visual indicator for spot light (sun)
+                const sunGeometry = new THREE.SphereGeometry(2, 32, 32); // Adjust size as needed
+                const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 }); // Yellow color for the sun
+                const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+                sunMesh.position.copy(spotLight.position);
+                scene.add(sunMesh);
+
+                // Add visual indicator for spot light
+                const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+                scene.add(spotLightHelper);
+            }
+
+            // Add additional point lights to simulate stars
+            {
+                const starColors = [0xFFFFFF, 0xFFD700, 0xFF4500, 0x1E90FF];
+                const starPositions = [
+                    { x: 50, y: 50, z: -50 },
+                    { x: -50, y: 100, z: 50 },
+                    { x: 100, y: 150, z: -100 },
+                    { x: -100, y: 200, z: 100 },
+                ];
+
+                starPositions.forEach((pos, index) => {
+                    const color = starColors[index % starColors.length];
+                    const intensity = 50;
+                    const pointLight = new THREE.PointLight(color, intensity, 500);
+                    pointLight.position.set(pos.x, pos.y, pos.z);
+                    scene.add(pointLight);
+
+                    // Add visual indicator for point light (star)
+                    const sphereSize = 1;
+                    const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
+                    scene.add(pointLightHelper);
+                });
+            }
+
+            // Add ambient light to simulate the glow of space
+            {
+                const color = 0x444444;
+                const intensity = 2;
+                const ambientLight = new THREE.AmbientLight(color, intensity);
+                scene.add(ambientLight);
             }
 
             let dogModel; // Variable to store the dog model
@@ -102,7 +195,10 @@
                     objLoader.setMaterials(mtl);
                     objLoader.load('resources/models/dog/dog.obj', (root) => {
                         root.rotation.x = -190;
-                        root.scale.set(0.2, 0.2, 0.2);
+                        root.scale.set(.7, .7, .7);
+                        root.position.y = -7.5;
+                        root.position.z = -30;
+                    
                         scene.add(root);
                         dogModel = root; // Store the dog model
                     });
@@ -119,7 +215,27 @@
                         root.position.z = -69;
                         root.rotation.y = 90;
                         root.scale.set(6.2, 6.2, 6.2);
+                        root.position.y = -12.5;
                         scene.add(root);
+                    });
+                });
+            }
+
+            let lighthouseModel; // Variable to store the lighthouse model
+
+            {
+                const mtlLoader = new MTLLoader();
+                mtlLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.mtl', (mtl) => {
+                    mtl.preload();
+                    const objLoader = new OBJLoader();
+                    objLoader.setMaterials(mtl);
+                    objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
+                        root.position.z = -69;
+                        root.rotation.y = 90;
+                        root.scale.set(6.2, 6.2, 6.2);
+                        root.position.y = -12.5;
+                        scene.add(root);
+                        lighthouseModel = root; // Store the lighthouse model
                     });
                 });
             }
@@ -133,7 +249,7 @@
             const torusGeometry = new THREE.TorusGeometry(1, 0.4, 16, 100);
             
 
-            function makeInstance(geometry, color, x=0, y=0, z=10, url='resources/images/wall.jpg') {
+            function makeInstance(geometry, color, x=0, y=0, z=10, scale=30,url='resources/images/wall.jpg') {
               const loader = new THREE.TextureLoader();
               const texture = loader.load( url );
               texture.colorSpace = THREE.SRGBColorSpace;
@@ -146,34 +262,34 @@
               cube.position.x = x;
               cube.position.y = y;
               cube.position.z = z;
-              cube.scale.set(10, 10, 10);
+              cube.scale.set(scale, scale, scale);
 
               return cube;
             }
 
-            // 20 cubes that are individually placed and rendered. They will all be rotating when rendered
-            const cubes = [
-              makeInstance(cylinderGeometry, 0x44aa88, 50, 1, -5, 'resources/images/grass.jpg'),
-              makeInstance(sphereGeometry, 0x8844aa, 125, 1, 10),
-              makeInstance(sphereGeometry, 0xaa8844, 146, 1),
-              makeInstance(sphereGeometry, 0xff0000, 58, 7, -50),
-              makeInstance(cylinderGeometry, 0x00ff00, 12, 1, 32),
-              makeInstance(geometry, 0x0000ff, -16, 1, -12),
-              makeInstance(torusGeometry, 0xffff00, 8, 1, 24),
-              makeInstance(geometry, 0xff00ff, -4, 1, -24),
-              makeInstance(sphereGeometry, 0x00ffff, 4, 1, 150),
-              makeInstance(geometry, 0xffffff, -20, 1, 36),
-              makeInstance(torusGeometry, 0x000000, 20, 1, -120),
-              makeInstance(geometry, 0x123456, -24, 1, 17),
-              makeInstance(sphereGeometry, 0x654321, 24, 100),
-              makeInstance(geometry, 0xabcdef, -28, 1, -50),
-              makeInstance(geometry, 0xfedcba, 28, 1),
-              makeInstance(torusGeometry, 0x112233, -32, 1),
-              makeInstance(cylinderGeometry, 0x334455, 32, 1),
-              makeInstance(geometry, 0x556677, -36, 1),
-              makeInstance(cylinderGeometry, 0x778899, 36, 1),
-              makeInstance(sphereGeometry, 0x99aabb, -40, 1),
-          ];
+        // 20 planets of various shapes that are individually placed and rendered. They will all be rotating when rendered
+        const twenty_shapes = [
+            makeInstance(cylinderGeometry, 0x44aa88, 100, 12, -100, 10, 'resources/images/nebula.jpg'),
+            makeInstance(sphereGeometry, 0x8844aa, 300, 22, 200, 30, 'resources/images/grass.jpg'),
+            makeInstance(sphereGeometry, 0xaa8844, 400, 28, 300, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xff0000, 200, 36, -300, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x00ff00, 100, 10, 400, 30, 'resources/images/water.jpg'),
+            makeInstance(geometry, 0x0000ff, -200, 19, -200, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(torusGeometry, 0xffff00, 160, 15, 480, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(geometry, 0xff00ff, -80, 11, -480, 30, 'resources/images/water.jpg'),
+            makeInstance(sphereGeometry, 0x00ffff, 680, 12, 300, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(geometry, 0xffffff, -240, 11, 720, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(torusGeometry, 0x000000, 400, 11, -240, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(geometry, 0x123456, -560, 10, 340, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0x654321, 600, 100, 400, 30, 'resources/images/nebula.jpg'),
+            makeInstance(geometry, 0xabcdef, -800, 11, -1000),
+            makeInstance(geometry, 0xfedcba, 800, 17, 200),
+            makeInstance(torusGeometry, 0x112233, -740, 20, 600),
+            makeInstance(cylinderGeometry, 0x334455, 740, 25, 800, 30, 'resources/images/water.jpg'),
+            makeInstance(geometry, 0x556677, -800, 21, 1000, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x778899, 900, 29, 1200, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0x99aabb, 1000, 35, 1400, 30, 'resources/images/stone-texture.jpg'),
+        ];
 
             function resizeRendererToDisplaySize(renderer) {
                 const canvas = renderer.domElement;
@@ -195,22 +311,19 @@
                     camera.updateProjectionMatrix();
                 }
 
-                // cubes.forEach((cube, ndx) => {
-                //     const speed = 1 + ndx * .1;
-                //     const rot = time * 10 * speed;
-                //     cube.rotation.x = rot;
-                //     cube.rotation.y = rot;
-                // });
-
-                // Only the first cube is being rotated
-                cubes[0].rotation.x = time * 15;
-                cubes[2].rotation.y = time * 5;
-                cubes[1].rotation.x = time * 5;
+                twenty_shapes.forEach((cube, ndx) => {
+                    const speed = 1 + ndx * .1;
+                    const rot = time * 0.2 * speed;
+                    cube.rotation.x = rot;
+                    cube.rotation.y = rot;
+                });
 
                 // Rotate the dog model if it is loaded
                 if (dogModel) {
-                    dogModel.rotation.z = time * 0.5;
+                    dogModel.rotation.z = time * 0.05;
+                    dogModel.rotation.y = time * 0.05;
                 }
+
 
                 renderer.render(scene, camera);
                 requestAnimationFrame(render);
