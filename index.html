@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D World made with Three.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
 </head>
 <body>
     <p>Top of canvas</p>
@@ -30,27 +31,42 @@
             const aspect = 2; // the canvas default
             const near = 0.1;
             const far = 2000;
-            const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-            camera.position.set(0, 10, 20);
 
-            const controls = new OrbitControls(camera, canvas);
+            // Create multiple cameras
+            const camera1 = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            camera1.position.set(0, 10, 20);
+
+            const camera2 = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            camera2.position.set(200, 100, 0);
+
+            const camera3 = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            camera3.position.set(-1000, -500, 0);
+
+            let activeCamera = camera1;
+
+            const controls = new OrbitControls(activeCamera, canvas);
             controls.target.set(0, 5, 0);
             controls.update();
 
             const scene = new THREE.Scene();
 
+            // Add black space fog to the scene
+            const fogColor = new THREE.Color(0x330066); // Black color for outer space
+            const fogDensity = 0.0015; // Adjust the density as needed
+            scene.fog = new THREE.FogExp2(fogColor, fogDensity);
+
             // Load the skybox texture
             const loader = new THREE.TextureLoader();
             const texture = loader.load(
-			'resources/images/nebula.jpg',
-			() => {
-				texture.mapping = THREE.EquirectangularReflectionMapping;
-				texture.colorSpace = THREE.SRGBColorSpace;
-				scene.background = texture;
-			} );
+                'resources/images/nebula.jpg',
+                () => {
+                    texture.mapping = THREE.EquirectangularReflectionMapping;
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    scene.background = texture;
+                });
 
             {
-                const planeSize = 2000;
+                const planeSize = 4000;
 
                 const loader = new THREE.TextureLoader();
                 const texture = loader.load('resources/images/water.jpg');
@@ -80,8 +96,8 @@
             }
 
             {
-                const color = 0xFFFFFF;
-                const intensity = 5; // Increased intensity
+                const color = 0xFFFFFD;
+                const intensity = 50; // Increased intensity
                 const light = new THREE.DirectionalLight(color, intensity);
                 light.position.set(0, 10, 0);
                 light.target.position.set(-5, 0, 0);
@@ -93,7 +109,7 @@
                 // Add ambient light source
             {
                 const color = 0xFFFFFF;
-                const intensity = 5; // Increased intensity
+                const intensity = 6; // Increased intensity
                 const ambientLight = new THREE.AmbientLight(color, intensity);
                 scene.add(ambientLight);
             }
@@ -101,7 +117,7 @@
             // Add point light source
             {
                 const color = 0xFFFFFF;
-                const intensity = 100; // Increased intensity
+                const intensity = 1000; // Increased intensity
                 const pointLight = new THREE.PointLight(color, intensity);
                 pointLight.position.set(10, 10, 10);
                 scene.add(pointLight);
@@ -130,27 +146,24 @@
 
             // Add spot light source
             {
-                const color = 0xFFFFFF;
-                const intensity = 100; // Increased intensity
+                const color = 0xFDFFFF;
+                const intensity = 10000; // Increased intensity
                 const spotLight = new THREE.SpotLight(color, intensity);
-                spotLight.position.set(0, 50, 0); // Adjust position as needed
+                spotLight.position.set(0, 520, 520); // Adjust position as needed
                 spotLight.target.position.set(0, 0, 0); // Point to the center of the scene
-                spotLight.angle = Math.PI / 4; // Increase angle to cover more area
-                spotLight.distance = 200; // Increase distance to cover the entire scene
+             
+                spotLight.distance = 2000; // Increase distance to cover the entire scene
                 spotLight.penumbra = 0.5; // Add some softness to the edges
                 scene.add(spotLight);
                 scene.add(spotLight.target);
 
                 // Add visual indicator for spot light (sun)
-                const sunGeometry = new THREE.SphereGeometry(2, 32, 32); // Adjust size as needed
+                const sunGeometry = new THREE.SphereGeometry(32, 32, 32); 
                 const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 }); // Yellow color for the sun
                 const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
                 sunMesh.position.copy(spotLight.position);
                 scene.add(sunMesh);
 
-                // Add visual indicator for spot light
-                const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-                scene.add(spotLightHelper);
             }
 
             // Add additional point lights to simulate stars
@@ -180,7 +193,7 @@
             // Add ambient light to simulate the glow of space
             {
                 const color = 0x444444;
-                const intensity = 2;
+                const intensity = 20;
                 const ambientLight = new THREE.AmbientLight(color, intensity);
                 scene.add(ambientLight);
             }
@@ -231,9 +244,10 @@
                     objLoader.setMaterials(mtl);
                     objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
                         root.position.z = -69;
-                        root.rotation.y = 90;
+                        root.rotation.y = 100;
                         root.scale.set(6.2, 6.2, 6.2);
-                        root.position.y = -12.5;
+                        root.position.y = -22.5;
+                        root.rotation.x = 90;
                         scene.add(root);
                         lighthouseModel = root; // Store the lighthouse model
                     });
@@ -268,38 +282,49 @@
             }
 
         // 30 planets of various shapes that are individually placed and rendered. They will all be rotating when rendered
-        const twenty_shapes = [
-            makeInstance(cylinderGeometry, 0x44aa88, 100, 12, -100, 10, 'resources/images/nebula.jpg'),
-            makeInstance(sphereGeometry, 0x8844aa, 300, 22, 200, 30, 'resources/images/grass.jpg'),
-            makeInstance(sphereGeometry, 0xaa8844, 400, 28, 300, 40, 'resources/images/stone-texture.jpg'),
-            makeInstance(sphereGeometry, 0xff0000, 200, 36, -300, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(cylinderGeometry, 0x00ff00, 100, 10, 400, 30, 'resources/images/water.jpg'),
-            makeInstance(geometry, 0x0000ff, -200, 19, -200, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(torusGeometry, 0xffff00, 160, 15, 480, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(geometry, 0xff00ff, -80, 11, -480, 30, 'resources/images/water.jpg'),
-            makeInstance(sphereGeometry, 0x00ffff, 680, 12, 300, 10, 'resources/images/stone-texture.jpg'),
+        const thirty_shapes = [
+            makeInstance(cylinderGeometry, 0x44aa88, 100, 12, -100, 30, 'resources/images/nebula.jpg'),
+            makeInstance(sphereGeometry, 0x8844aa, 300, 22, -200, 30, 'resources/images/grass.jpg'),
+            makeInstance(sphereGeometry, 0xaa8844, 400, 28, -300, 40, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xff0000, 200, 36, 50, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x00ff00, 100, 20, 400, 30, 'resources/images/water.jpg'),
+            makeInstance(geometry, 0x0000ff, -200, 19, 100, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(torusGeometry, 0xffff00, 160, 15, -480, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(geometry, 0xff00ff, -80, 11, -40, 30, 'resources/images/water.jpg'),
+            makeInstance(sphereGeometry, 0x00ffff, 80, 12, -350, 10, 'resources/images/stone-texture.jpg'),
             makeInstance(geometry, 0xffffff, -240, 11, 720, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(torusGeometry, 0x000000, 400, 11, -240, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(geometry, 0x123456, -560, 10, 340, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(sphereGeometry, 0x654321, 600, 100, 400, 30, 'resources/images/nebula.jpg'),
-            makeInstance(geometry, 0xabcdef, -800, 11, -1000),
-            makeInstance(geometry, 0xfedcba, 800, 17, 200),
-            makeInstance(torusGeometry, 0x112233, -740, 20, 600),
-            makeInstance(cylinderGeometry, 0x334455, 740, 25, 800, 30, 'resources/images/water.jpg'),
-            makeInstance(geometry, 0x556677, -800, 21, 1000, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(cylinderGeometry, 0x778899, 900, 29, 1200, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(sphereGeometry, 0x99aabb, 1000, 35, 1400, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(sphereGeometry, 0xFF6347, -1000, 40, -1500, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(cylinderGeometry, 0x4682B4, 1200, 45, 1600, 60, 'resources/images/stone-texture.jpg'),
-            makeInstance(torusGeometry, 0x8A2BE2, -1300, 50, 1800, 20, 'resources/images/stone-texture.jpg'),
+            makeInstance(torusGeometry, 0x000000, 400, 111, -300, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(geometry, 0x123456, -560, 20, 340, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0x654321, 600, 100, 420, 10, 'resources/images/nebula.jpg'),
+            makeInstance(geometry, 0xabcdef, -800, 21, 1000),
+            makeInstance(geometry, 0xfedcba, 800, 117, -200),
+            makeInstance(torusGeometry, 0x112233, -740, 120, -600),
+            makeInstance(cylinderGeometry, 0x334455, 740, 25, 140, 30, 'resources/images/water.jpg'),
+            makeInstance(geometry, 0x556677, -800, 21, -110, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x778899, 900, 29, -270, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0x99aabb, 500, 135, -420, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xFF6347, -1000, 140, -550, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x4682B4, 200, 45, -650, 60, 'resources/images/stone-texture.jpg'),
+            makeInstance(torusGeometry, 0x8A2BE2, -300, 50, -180, 20, 'resources/images/stone-texture.jpg'),
             makeInstance(geometry, 0xD2691E, 1400, 55, -2000, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(sphereGeometry, 0xDC143C, -1500, 60, 2200, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(cylinderGeometry, 0x00CED1, 1600, 65, -2400, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(torusGeometry, 0xFF1493, -1700, 70, 2600, 20, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xDC143C, -1500, 60, -200, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x00CED1, 1600, 65, -100, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(torusGeometry, 0xFF1493, -1700, 70, -200, 20, 'resources/images/stone-texture.jpg'),
             makeInstance(geometry, 0xFFD700, 1800, 75, -2800, 30, 'resources/images/stone-texture.jpg'),
-            makeInstance(sphereGeometry, 0xADFF2F, -1900, 80, 3000, 10, 'resources/images/stone-texture.jpg'),
-            makeInstance(cylinderGeometry, 0x4B0082, 2000, 85, -3200, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xADFF2F, -1900, 80, -110, 10, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x4B0082, -120, 85, -240, 30, 'resources/images/stone-texture.jpg'),
         ];
+
+            // GUI for switching cameras
+            const gui = new dat.GUI();
+            const cameraOptions = {
+                Camera1: () => { activeCamera = camera1; controls.object = camera1; controls.update(); },
+                Camera2: () => { activeCamera = camera2; controls.object = camera2; controls.update(); },
+                Camera3: () => { activeCamera = camera3; controls.object = camera3; controls.update(); }
+            };
+            gui.add(cameraOptions, 'Camera1');
+            gui.add(cameraOptions, 'Camera2');
+            gui.add(cameraOptions, 'Camera3');
 
             function resizeRendererToDisplaySize(renderer) {
                 const canvas = renderer.domElement;
@@ -317,13 +342,13 @@
 
                 if (resizeRendererToDisplaySize(renderer)) {
                     const canvas = renderer.domElement;
-                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
-                    camera.updateProjectionMatrix();
+                    activeCamera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    activeCamera.updateProjectionMatrix();
                 }
 
-                twenty_shapes.forEach((cube, ndx) => {
+                thirty_shapes.forEach((cube, ndx) => {
                     const speed = 1 + ndx * .1;
-                    const rot = time * 0.2 * speed;
+                    const rot = time * 0.1 * speed;
                     cube.rotation.x = rot;
                     cube.rotation.y = rot;
                 });
@@ -334,8 +359,7 @@
                     dogModel.rotation.y = time * 0.05;
                 }
 
-
-                renderer.render(scene, camera);
+                renderer.render(scene, activeCamera);
                 requestAnimationFrame(render);
             }
 
