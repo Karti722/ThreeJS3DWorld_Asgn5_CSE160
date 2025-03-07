@@ -267,17 +267,17 @@
               return cube;
             }
 
-        // 20 planets of various shapes that are individually placed and rendered. They will all be rotating when rendered
+        // 30 planets of various shapes that are individually placed and rendered. They will all be rotating when rendered
         const twenty_shapes = [
             makeInstance(cylinderGeometry, 0x44aa88, 100, 12, -100, 10, 'resources/images/nebula.jpg'),
             makeInstance(sphereGeometry, 0x8844aa, 300, 22, 200, 30, 'resources/images/grass.jpg'),
-            makeInstance(sphereGeometry, 0xaa8844, 400, 28, 300, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xaa8844, 400, 28, 300, 40, 'resources/images/stone-texture.jpg'),
             makeInstance(sphereGeometry, 0xff0000, 200, 36, -300, 30, 'resources/images/stone-texture.jpg'),
             makeInstance(cylinderGeometry, 0x00ff00, 100, 10, 400, 30, 'resources/images/water.jpg'),
             makeInstance(geometry, 0x0000ff, -200, 19, -200, 30, 'resources/images/stone-texture.jpg'),
             makeInstance(torusGeometry, 0xffff00, 160, 15, 480, 30, 'resources/images/stone-texture.jpg'),
             makeInstance(geometry, 0xff00ff, -80, 11, -480, 30, 'resources/images/water.jpg'),
-            makeInstance(sphereGeometry, 0x00ffff, 680, 12, 300, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0x00ffff, 680, 12, 300, 10, 'resources/images/stone-texture.jpg'),
             makeInstance(geometry, 0xffffff, -240, 11, 720, 30, 'resources/images/stone-texture.jpg'),
             makeInstance(torusGeometry, 0x000000, 400, 11, -240, 30, 'resources/images/stone-texture.jpg'),
             makeInstance(geometry, 0x123456, -560, 10, 340, 30, 'resources/images/stone-texture.jpg'),
@@ -289,6 +289,16 @@
             makeInstance(geometry, 0x556677, -800, 21, 1000, 30, 'resources/images/stone-texture.jpg'),
             makeInstance(cylinderGeometry, 0x778899, 900, 29, 1200, 30, 'resources/images/stone-texture.jpg'),
             makeInstance(sphereGeometry, 0x99aabb, 1000, 35, 1400, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xFF6347, -1000, 40, -1500, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x4682B4, 1200, 45, 1600, 60, 'resources/images/stone-texture.jpg'),
+            makeInstance(torusGeometry, 0x8A2BE2, -1300, 50, 1800, 20, 'resources/images/stone-texture.jpg'),
+            makeInstance(geometry, 0xD2691E, 1400, 55, -2000, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xDC143C, -1500, 60, 2200, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x00CED1, 1600, 65, -2400, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(torusGeometry, 0xFF1493, -1700, 70, 2600, 20, 'resources/images/stone-texture.jpg'),
+            makeInstance(geometry, 0xFFD700, 1800, 75, -2800, 30, 'resources/images/stone-texture.jpg'),
+            makeInstance(sphereGeometry, 0xADFF2F, -1900, 80, 3000, 10, 'resources/images/stone-texture.jpg'),
+            makeInstance(cylinderGeometry, 0x4B0082, 2000, 85, -3200, 30, 'resources/images/stone-texture.jpg'),
         ];
 
             function resizeRendererToDisplaySize(renderer) {
