@@ -7,6 +7,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
 </head>
 <body>
+    <h1>Added the three basic features</h1>
+    <ol>
+        <li>Added fog with color 0x330066</li>
+        <li>Added three different cameras with a GUI</li>
+        <li>Added a color picker (Click on the planet atmosphere plane to change its color)</li>
+    </ol>
     <p>Top of canvas</p>
     <canvas id="c" width="1920" height="960">
         <script  type="importmap">{
@@ -17,11 +23,14 @@
         }</script>
     </canvas>
     <p>Bottom of canvas</p>
+
     <script type="module" >
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
         import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
         function main() {
             const canvas = document.querySelector('#c');
@@ -54,6 +63,42 @@
             const fogColor = new THREE.Color(0x330066); // Black color for outer space
             const fogDensity = 0.0015; // Adjust the density as needed
             scene.fog = new THREE.FogExp2(fogColor, fogDensity);
+
+            // Raycaster and mouse vector for picking
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            // Define an array of colors to cycle through
+            const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff];
+
+            // Event listener for mouse click
+            window.addEventListener('click', onMouseClick, false);
+
+            function onMouseClick(event) {
+                // Calculate mouse position in normalized device coordinates
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                // Update the raycaster with the camera and mouse position
+                raycaster.setFromCamera(mouse, activeCamera);
+
+                // Calculate objects intersecting the picking ray
+                const intersects = raycaster.intersectObjects(scene.children, true);
+
+                if (intersects.length > 0) {
+                    const intersectedObject = intersects[0].object;
+                    console.log('Picked object:', intersectedObject);
+
+                    // Cycle through the colors
+                    if (!intersectedObject.userData.colorIndex) {
+                        intersectedObject.userData.colorIndex = 0;
+                    }
+                    intersectedObject.userData.colorIndex = (intersectedObject.userData.colorIndex + 1) % colors.length;
+                    intersectedObject.material.color.set(colors[intersectedObject.userData.colorIndex]);
+
+                    // Add any additional logic for the picked object here
+                }
+            }
 
             // Load the skybox texture
             const loader = new THREE.TextureLoader();
@@ -121,11 +166,6 @@
                 const pointLight = new THREE.PointLight(color, intensity);
                 pointLight.position.set(10, 10, 10);
                 scene.add(pointLight);
-
-                // Add visual indicator for point light
-                const sphereSize = 1;
-                const pointLightHelper = new THREE.PointLightHelper(pointLight, sphereSize);
-                scene.add(pointLightHelper);
             }
 
             // Add spot light source
@@ -139,12 +179,9 @@
                 scene.add(spotLight);
                 scene.add(spotLight.target);
 
-                // Add visual indicator for spot light
-                const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-                scene.add(spotLightHelper);
             }
 
-            // Add spot light source
+         
             {
                 const color = 0xFDFFFF;
                 const intensity = 10000; // Increased intensity
@@ -166,7 +203,7 @@
 
             }
 
-            // Add additional point lights to simulate stars
+            // Added additional point lights to simulate stars
             {
                 const starColors = [0xFFFFFF, 0xFFD700, 0xFF4500, 0x1E90FF];
                 const starPositions = [
@@ -190,7 +227,7 @@
                 });
             }
 
-            // Add ambient light to simulate the glow of space
+            // Added ambient light to simulate the glow of space
             {
                 const color = 0x444444;
                 const intensity = 20;
@@ -226,6 +263,8 @@
                     objLoader.setMaterials(mtl);
                     objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
                         root.position.z = -69;
+                        root.rotation.x = 50;
+                        root.position.x = -42.5;
                         root.rotation.y = 90;
                         root.scale.set(6.2, 6.2, 6.2);
                         root.position.y = -12.5;
@@ -325,6 +364,27 @@
             gui.add(cameraOptions, 'Camera1');
             gui.add(cameraOptions, 'Camera2');
             gui.add(cameraOptions, 'Camera3');
+
+            // Load font and add text
+            const fontLoader = new FontLoader();
+            fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+                const textGeometry = new TextGeometry('Kartikeya made this', {
+                    font: font,
+                    size: 10,
+                    height: 1,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 1,
+                    bevelSize: 0.5,
+                    bevelOffset: 0,
+                    bevelSegments: 5
+                });
+
+                const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+                textMesh.position.set(-50, 50, -1000); // Adjust position as needed
+                scene.add(textMesh);
+            });
 
             function resizeRendererToDisplaySize(renderer) {
                 const canvas = renderer.domElement;
